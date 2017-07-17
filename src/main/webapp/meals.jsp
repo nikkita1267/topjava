@@ -6,25 +6,7 @@
     <title>Meals</title>
     <style>
         table {
-            border-collapse: collapse;
-            border: 1px solid black;
             width: 100%;
-            margin-top: 10px;
-        }
-
-        tr {
-            padding: 10px;
-            font-style: italic;
-            text-align: center;
-        }
-
-        tr.top {
-            background-color: green;
-        }
-
-        tr:nth-child(odd) {
-            border-top: black solid 1px;
-            border-bottom: black solid 1px;
         }
 
         tr.exceed {
@@ -57,7 +39,9 @@
                 <td>
                     <c:out value="${meal.description}" />
                 </td>
-                <td>${f:formatLocalDateTime(meal.dateTime, 'dd.MM.yyyy kk:mm')}</td>
+                <td>
+                        ${f:formatLocalDateTime(meal.dateTime)}
+                </td>
                 <td>
                     <c:out value="${meal.calories}" />
                 </td>
