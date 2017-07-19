@@ -54,6 +54,9 @@
     <table>
         <tr class="top">
             <th>
+                Id
+            </th>
+            <th>
                 Description
             </th>
             <th>
