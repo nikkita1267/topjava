@@ -7,7 +7,6 @@ import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.service.MealService;
 import ru.javawebinar.topjava.to.MealWithExceed;
 import ru.javawebinar.topjava.util.DateTimeUtil;
-import ru.javawebinar.topjava.util.ValidationUtil;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -35,7 +34,6 @@ public class MealRestController {
     }
 
     public Meal add(Meal meal) {
-        ValidationUtil.checkNew(meal);
         return service.save(meal, AuthorizedUser.id());
     }
 
@@ -43,12 +41,12 @@ public class MealRestController {
         service.update(meal, AuthorizedUser.id());
     }
 
-    public void delete(Meal meal) {
-        service.delete(meal.getId(), AuthorizedUser.id());
+    public void delete(int id) {
+        service.delete(id, AuthorizedUser.id());
     }
 
-    public MealWithExceed get(int id) {
-        return getAll().get(id);
+    public Meal get(int id) {
+        return service.getAll(AuthorizedUser.id()).get(id);
     }
 
     public List<MealWithExceed> get(String search) {

@@ -1,12 +1,12 @@
 package ru.javawebinar.topjava.model;
 
+import ru.javawebinar.topjava.AuthorizedUser;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 public class Meal extends BaseEntity {
-    private volatile Integer id;
-
     private volatile Integer ownerId;
 
     private final LocalDateTime dateTime;
@@ -20,7 +20,7 @@ public class Meal extends BaseEntity {
     }
 
     public Meal(Integer id, LocalDateTime dateTime, String description, int calories) {
-        this(id, null, dateTime, description, calories);
+        this(id, AuthorizedUser.id(), dateTime, description, calories);
     }
 
     public Meal(Integer id, Integer ownerId, LocalDateTime dateTime, String description, int calories) {
