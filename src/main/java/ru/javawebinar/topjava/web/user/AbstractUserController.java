@@ -8,7 +8,7 @@ import ru.javawebinar.topjava.service.UserService;
 
 import java.util.List;
 
-import static ru.javawebinar.topjava.util.ValidationUtil.checkIdConsistent;
+import static ru.javawebinar.topjava.util.ValidationUtil.assureIdConsistent;
 import static ru.javawebinar.topjava.util.ValidationUtil.checkNew;
 
 public abstract class AbstractUserController {
@@ -30,7 +30,7 @@ public abstract class AbstractUserController {
     public User create(User user) {
         log.info("create {}", user);
         checkNew(user);
-        return service.save(user);
+        return service.create(user);
     }
 
     public void delete(int id) {
@@ -40,7 +40,7 @@ public abstract class AbstractUserController {
 
     public void update(User user, int id) {
         log.info("update {} with id={}", user, id);
-        checkIdConsistent(user, id);
+        assureIdConsistent(user, id);
         service.update(user);
     }
 
