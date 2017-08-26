@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
-public class JdbcMealRepositoryImpl implements MealRepository {
+public abstract class JdbcMealRepositoryImpl implements MealRepository {
 
     private static final RowMapper<Meal> ROW_MAPPER = BeanPropertyRowMapper.newInstance(Meal.class);
 
@@ -39,11 +39,15 @@ public class JdbcMealRepositoryImpl implements MealRepository {
 
     @Override
     public Meal save(Meal meal, int userId) {
+        return saveWithDate(meal, userId, meal.getDateTime());
+    }
+
+    protected <T> Meal saveWithDate(Meal meal, int userId, T time) {
         MapSqlParameterSource map = new MapSqlParameterSource()
                 .addValue("id", meal.getId())
                 .addValue("description", meal.getDescription())
                 .addValue("calories", meal.getCalories())
-                .addValue("date_time", meal.getDateTime())
+                .addValue("date_time", time)
                 .addValue("user_id", userId);
 
         if (meal.isNew()) {
@@ -81,6 +85,10 @@ public class JdbcMealRepositoryImpl implements MealRepository {
 
     @Override
     public List<Meal> getBetween(LocalDateTime startDate, LocalDateTime endDate, int userId) {
+        return getBetweenDate(startDate, endDate, userId);
+    }
+
+    protected <T> List<Meal> getBetweenDate(T startDate, T endDate, int userId) {
         return jdbcTemplate.query(
                 "SELECT * FROM meals WHERE user_id=?  AND date_time BETWEEN  ? AND ? ORDER BY date_time DESC",
                 ROW_MAPPER, userId, startDate, endDate);
