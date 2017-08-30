@@ -8,7 +8,11 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.repository.MealRepository;
 
@@ -19,6 +23,8 @@ import java.util.List;
 @Repository
 public class JdbcMealRepositoryImpl implements MealRepository {
 
+    private final DataSourceTransactionManager manager;
+
     private static final RowMapper<Meal> ROW_MAPPER = BeanPropertyRowMapper.newInstance(Meal.class);
 
     private final JdbcTemplate jdbcTemplate;
@@ -28,37 +34,51 @@ public class JdbcMealRepositoryImpl implements MealRepository {
     private final SimpleJdbcInsert insertMeal;
 
     @Autowired
-    public JdbcMealRepositoryImpl(DataSource dataSource, JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
+    public JdbcMealRepositoryImpl(
+            DataSource dataSource,
+            JdbcTemplate jdbcTemplate,
+            NamedParameterJdbcTemplate namedParameterJdbcTemplate,
+            DataSourceTransactionManager manager
+    ) {
         this.insertMeal = new SimpleJdbcInsert(dataSource)
                 .withTableName("meals")
                 .usingGeneratedKeyColumns("id");
 
         this.jdbcTemplate = jdbcTemplate;
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
+        this.manager = manager;
     }
 
     @Override
     public Meal save(Meal meal, int userId) {
-        MapSqlParameterSource map = new MapSqlParameterSource()
-                .addValue("id", meal.getId())
-                .addValue("description", meal.getDescription())
-                .addValue("calories", meal.getCalories())
-                .addValue("date_time", meal.getDateTime())
-                .addValue("user_id", userId);
+        TransactionDefinition def = new DefaultTransactionDefinition();
+        TransactionStatus st = manager.getTransaction(def);
+        try {
+            MapSqlParameterSource map = new MapSqlParameterSource()
+                    .addValue("id", meal.getId())
+                    .addValue("description", meal.getDescription())
+                    .addValue("calories", meal.getCalories())
+                    .addValue("date_time", meal.getDateTime())
+                    .addValue("user_id", userId);
 
-        if (meal.isNew()) {
-            Number newId = insertMeal.executeAndReturnKey(map);
-            meal.setId(newId.intValue());
-        } else {
-            if (namedParameterJdbcTemplate.update("" +
-                            "UPDATE meals " +
-                            "   SET description=:description, calories=:calories, date_time=:date_time " +
-                            " WHERE id=:id AND user_id=:user_id"
-                    , map) == 0) {
-                return null;
+            if (meal.isNew()) {
+                Number newId = insertMeal.executeAndReturnKey(map);
+                meal.setId(newId.intValue());
+            } else {
+                if (namedParameterJdbcTemplate.update("" +
+                                "UPDATE meals " +
+                                "   SET description=:description, calories=:calories, date_time=:date_time " +
+                                " WHERE id=:id AND user_id=:user_id"
+                        , map) == 0) {
+                    return null;
+                }
             }
+            manager.commit(st);
+            return meal;
+        } catch (Exception e){
+            manager.rollback(st);
+            throw e;
         }
-        return meal;
     }
 
     @Override
