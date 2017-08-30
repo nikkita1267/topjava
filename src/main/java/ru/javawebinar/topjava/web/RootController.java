@@ -12,8 +12,12 @@ import javax.servlet.http.HttpServletRequest;
 
 @Controller
 public class RootController {
-    @Autowired
     private UserService service;
+
+    @Autowired
+    public RootController(UserService service) {
+        this.service = service;
+    }
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String root() {
