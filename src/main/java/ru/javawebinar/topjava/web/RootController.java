@@ -14,11 +14,15 @@ import javax.servlet.http.HttpServletRequest;
 
 @Controller
 public class RootController {
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+
+    private final MealService mealService;
 
     @Autowired
-    private MealService mealService;
+    public RootController(UserService userService, MealService mealService) {
+        this.userService = userService;
+        this.mealService = mealService;
+    }
 
     @GetMapping("/")
     public String root() {
