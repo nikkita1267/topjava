@@ -16,7 +16,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <tomcat.version>8.5.20</tomcat.version>
+        <tomcat.version>8.5.23</tomcat.version>
         <spring.version>4.3.10.RELEASE</spring.version>
         <spring-data-jpa.version>1.11.6.RELEASE</spring-data-jpa.version>
         <spring-security.version>4.2.3.RELEASE</spring-security.version>
@@ -32,10 +32,12 @@
         <junit.version>4.12</junit.version>
         <hamcrest.version>1.3</hamcrest.version>
         <jsonassert.version>1.5.0</jsonassert.version>
+        <json-path.version>2.4.0</json-path.version>
 
         <!-- Hibernate -->
         <hibernate.version>5.2.10.Final</hibernate.version>
         <hibernate-validator.version>6.0.2.Final</hibernate-validator.version>
+        <jsoup.version>1.10.3</jsoup.version>
         <javax-el.version>3.0.1-b08</javax-el.version>
 
         <!--Tools-->
@@ -112,28 +114,28 @@
                 </configuration>
             </plugin>
 
-<!--
-            <plugin>
-                <groupId>org.apache.tomcat.maven</groupId>
-                <artifactId>tomcat7-maven-plugin</artifactId>
-                <version>2.2</version>
-                <configuration>
-                    <contextFile>src/main/resources/tomcat/context.xml</contextFile>
-                    <systemProperties>
-                        <file.encoding>UTF-8</file.encoding>
-                        <spring.profiles.active>tomcat,datajpa</spring.profiles.active>
-                    </systemProperties>
-                    <protocol>org.apache.coyote.http11.Http11NioProtocol</protocol>
-                </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.postgresql</groupId>
-                        <artifactId>postgresql</artifactId>
-                        <version>${postgresql.version}</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
--->
+            <!--
+                        <plugin>
+                            <groupId>org.apache.tomcat.maven</groupId>
+                            <artifactId>tomcat7-maven-plugin</artifactId>
+                            <version>2.2</version>
+                            <configuration>
+                                <contextFile>src/main/resources/tomcat/context.xml</contextFile>
+                                <systemProperties>
+                                    <file.encoding>UTF-8</file.encoding>
+                                    <spring.profiles.active>tomcat,datajpa</spring.profiles.active>
+                                </systemProperties>
+                                <protocol>org.apache.coyote.http11.Http11NioProtocol</protocol>
+                            </configuration>
+                            <dependencies>
+                                <dependency>
+                                    <groupId>org.postgresql</groupId>
+                                    <artifactId>postgresql</artifactId>
+                                    <version>${postgresql.version}</version>
+                                </dependency>
+                            </dependencies>
+                        </plugin>
+            -->
         </plugins>
     </build>
 
@@ -227,6 +229,11 @@
             <version>${hibernate-validator.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>${jsoup.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-ehcache</artifactId>
             <version>${hibernate.version}</version>
@@ -263,6 +270,12 @@
             <artifactId>tomcat-servlet-api</artifactId>
             <version>${tomcat.version}</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.jayway.jsonpath</groupId>
+            <artifactId>json-path</artifactId>
+            <version>${json-path.version}</version>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -400,6 +413,48 @@
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
+        </profile>
+        <profile>
+            <id>heroku</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <version>3.0.2</version>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>copy</goal>
+                                </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>com.github.jsimone</groupId>
+                                            <artifactId>webapp-runner</artifactId>
+                                            <version>8.5.23.0</version>
+                                            <destFileName>webapp-runner.jar</destFileName>
+                                        </artifactItem>
+                                    </artifactItems>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+            <dependencies>
+                <dependency>
+                    <groupId>org.postgresql</groupId>
+                    <artifactId>postgresql</artifactId>
+                    <version>${postgresql.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.tomcat</groupId>
+                    <artifactId>tomcat-jdbc</artifactId>
+                    <version>${tomcat.version}</version>
+                </dependency>
+            </dependencies>
         </profile>
     </profiles>
 

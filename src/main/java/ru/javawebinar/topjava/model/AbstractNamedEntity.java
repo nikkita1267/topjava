@@ -1,8 +1,12 @@
 package ru.javawebinar.topjava.model;
 
+import org.hibernate.validator.constraints.SafeHtml;
+import ru.javawebinar.topjava.View;
+
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
 
 @MappedSuperclass
@@ -10,6 +14,8 @@ public abstract class AbstractNamedEntity extends AbstractBaseEntity {
 
     @NotBlank
     @Column(name = "name", nullable = false)
+    @Size(min = 2, max = 100)
+    @SafeHtml(groups = {View.ValidatedRestUI.class})
     protected String name;
 
     public AbstractNamedEntity() {
